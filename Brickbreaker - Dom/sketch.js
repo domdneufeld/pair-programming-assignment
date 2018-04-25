@@ -1,12 +1,22 @@
+// Dom's
 let myPaddle;
 let myBall;
 let lifeCount;
 
+// Sarvath's
+let bricks, aBrick;
+let setOfBricks = [];
+
 function setup() {
+  // Dom
   createCanvas(windowHeight, windowHeight);
   myPaddle = new Paddle();
   myBall = new Ball();
   lifeCount = new Lives(3);
+
+  // Sarvath
+  bricks = new Brick();
+  bricks.create2dArray();
 }
 
 function draw() {
@@ -20,8 +30,12 @@ function draw() {
 
   lifeCount.display();
   lifeCount.removeLives();
+
+  // Sarvath's
+  bricks.makeBricks();
 }
 
+// Dom's
 class Paddle {
   constructor() {
     // Display variables
@@ -50,6 +64,7 @@ class Paddle {
       this.segmentx[i] = this.x - this.width / 2 + this.width / 6 * (i + 0.5);
     }
     // Draws the paddle
+    noStroke();
     rect(this.x, this.y, this.width, this.height);
   }
 
@@ -89,8 +104,6 @@ class Paddle {
     this.y = height - height / 8;
   }
 }
-
-
 
 class Ball {
   constructor() {
@@ -269,4 +282,53 @@ function keyReleased() {
     myPaddle.right = false;
   }
 
+}
+
+// SARVATH -------------------------------------------------------------------------------------------------------------------------------------------------
+class Brick {
+  constructor() {
+    this.rows = 4;
+    this.cols = 8;
+    this.width = width / 8;
+    this.height = height / 16;
+    this.hit = false;
+    this.state = 0;
+  }
+
+  makeBricks() {
+    rectMode(CORNER);
+    stroke(0);
+    strokeWeight(1);
+    for (let x = 0; x < this.cols; x++) {
+      for (let y = 0; y < this.rows; y++) {
+        if (setOfBricks[x][y] === 1) {
+          fill(255, 234, 45);
+          aBrick = rect(x * this.width, y * this.height, this.width, this.height);
+        }
+        if (setOfBricks[x][y] === 0) {
+          fill(0);
+          aBrick = rect(x * this.width, y * this.height, this.width, this.height);
+        }
+      }
+    }
+  }
+
+  create2dArray() {
+    for (let x = 0; x < this.cols; x++) {
+      setOfBricks.push([]);
+      for (let y = 0; y < this.rows; y++) {
+        setOfBricks[x].push(1);
+      }
+    }
+    return setOfBricks;
+  }
+}
+
+function mousePressed() {
+  let xcoord = floor(mouseX / bricks.width);
+  let ycoord = floor(mouseY / bricks.height);
+
+  if (setOfBricks[xcoord][ycoord] === 1) {
+    setOfBricks[xcoord][ycoord] = 0;
+  }
 }
