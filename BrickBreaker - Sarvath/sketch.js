@@ -321,28 +321,28 @@ class Brick {
           if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
             myBall.y - myBall.radius / 2 < this.yPosition + this.height && myBall.y - myBall.radius / 2 > this.yPosition) {
             setOfBricks[x][y] = 0;
-            myBall.ySpeed = -abs(myBall.ySpeed);
+            myBall.yDirection = -myBall.yDirection;
             console.log("hit");
           }
           // checks if top was hit
           if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
             myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition) {
             setOfBricks[x][y] = 0;
-            myBall.ySpeed = -abs(myBall.ySpeed);
+            myBall.yDirection = -myBall.yDirection;
             console.log("hit");
           }
           // checks if hits right
           if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.height &&
             myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition) {
             setOfBricks[x][y] = 0;
-            myBall.xSpeed = -abs(myBall.xSpeed);
+            myBall.xDirection = -myBall.xDirection;
             console.log("hit");
           }
           // checks if hit left
           if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.height &&
             myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition) {
             setOfBricks[x][y] = 0;
-            myBall.xSpeed = -abs(myBall.xSpeed);
+            myBall.xDirection = -myBall.xDirection;
             console.log("hit");
           }
         }
