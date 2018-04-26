@@ -33,6 +33,7 @@ function draw() {
 
   // Sarvath's
   bricks.makeBricks();
+  bricks.removeBrick();
 }
 
 // Dom's
@@ -74,23 +75,20 @@ class Paddle {
     }
     // Checks if the left arrow key is down and if the paddle is going to collide with the edge
     else if (this.left) {
-      if (this.x - this.width / 2 - this.speed > 0){
+      if (this.x - this.width / 2 - this.speed > 0) {
         this.direction = -1;
-      }
-      else{
+      } else {
         this.x = this.width / 2;
       }
     }
     // Checks if the right arrow key is down and if the paddle is going to collide with the edge
     else if (this.right) {
-      if (this.x + this.width / 2 + this.speed < width){
+      if (this.x + this.width / 2 + this.speed < width) {
         this.direction = 1;
-      }
-      else{
+      } else {
         this.x = width - this.width / 2;
       }
-    }
-    else {
+    } else {
       this.direction = 0;
     }
 
@@ -229,8 +227,7 @@ class Timer {
   isDone() {
     if (millis() >= this.finishTime) {
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -305,10 +302,10 @@ class Brick {
           fill(255, 234, 45);
           aBrick = rect(x * this.width, y * this.height, this.width, this.height);
         }
-        if (setOfBricks[x][y] === 0) {
-          fill(0);
-          aBrick = rect(x * this.width, y * this.height, this.width, this.height);
-        }
+        // if (setOfBricks[x][y] === 0) {
+        //   fill(0);
+        //   aBrick = rect(x * this.width, y * this.height, this.width, this.height);
+        // }
       }
     }
   }
@@ -321,6 +318,42 @@ class Brick {
       }
     }
     return setOfBricks;
+  }
+
+  // Sarvath
+  removeBrick() {
+    for (let x = 0; x < this.cols; x++) {
+      for (let y = 0; y < this.rows; y++) {
+        this.xPosition = x * this.width;
+        this.yPosition = y * this.height;
+        if (setOfBricks[x][y] === 1) {
+          //check if bottom hits
+          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
+          myBall.y - myBall.radius / 2 < this.yPosition + this.height && myBall.y - myBall.radius / 2 > this.yPosition) {
+            setOfBricks[x][y] = 0;
+            myBall.yDirection = -myBall.yDirection;
+          }
+          // checks if top was hit
+          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
+          myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition) {
+            setOfBricks[x][y] = 0;
+            myBall.yDirection = -myBall.yDirection;
+          }
+          // checks if hits right
+          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.height &&
+          myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition) {
+            setOfBricks[x][y] = 0;
+            myBall.xDirection = -myBall.xDirection;
+          }
+          // checks if hit left
+          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.height &&
+          myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition) {
+            setOfBricks[x][y] = 0;
+            myBall.xDirection = -myBall.xDirection;
+          }
+        }
+      }
+    }
   }
 }
 
