@@ -292,8 +292,8 @@ class Brick {
     this.cols = 8;
     this.width = width / 8;
     this.height = height / 16;
-    this.xPosition;
-    this.yPosition;
+    this.hit = false;
+    this.state = 0;
   }
 
   makeBricks() {
@@ -306,46 +306,10 @@ class Brick {
           fill(255, 234, 45);
           aBrick = rect(x * this.width, y * this.height, this.width, this.height);
         }
-      }
-    }
-  }
-
-  removeBrick() {
-
-    for (let x = 0; x < this.cols; x++) {
-      for (let y = 0; y < this.rows; y++) {
-        this.xPosition = x * this.width;
-        this.yPosition = y * this.height;
-        if (setOfBricks[x][y] === 1) {
-          //check if bottom hits
-          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
-            myBall.y - myBall.radius / 2 < this.yPosition + this.height && myBall.y - myBall.radius / 2 > this.yPosition) {
-            setOfBricks[x][y] = 0;
-            myBall.yDirection = -myBall.yDirection;
-            console.log("hit");
-          }
-          // checks if top was hit
-          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
-            myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition) {
-            setOfBricks[x][y] = 0;
-            myBall.yDirection = -myBall.yDirection;
-            console.log("hit");
-          }
-          // checks if hits right
-          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.height &&
-            myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition) {
-            setOfBricks[x][y] = 0;
-            myBall.xDirection = -myBall.xDirection;
-            console.log("hit");
-          }
-          // checks if hit left
-          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.height &&
-            myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition) {
-            setOfBricks[x][y] = 0;
-            myBall.xDirection = -myBall.xDirection;
-            console.log("hit");
-          }
-        }
+        // if (setOfBricks[x][y] === 0) {
+        //   fill(0);
+        //   aBrick = rect(x * this.width, y * this.height, this.width, this.height);
+        // }
       }
     }
   }
@@ -360,7 +324,43 @@ class Brick {
     return setOfBricks;
   }
 
-
+  // Sarvath
+  removeBrick() {
+    for (let x = 0; x < this.cols; x++) {
+      for (let y = 0; y < this.rows; y++) {
+        this.xPosition = x * this.width;
+        this.yPosition = y * this.height;
+        if (setOfBricks[x][y] === 1) {
+          //check if bottom hits
+          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
+          myBall.y - myBall.radius / 2 < this.yPosition + this.height && myBall.y - myBall.radius / 2 > this.yPosition && myBall.yDirection < 0) {
+            setOfBricks[x][y] = 0;
+            myBall.yDirection = -myBall.yDirection;
+          }
+          // checks if top was hit
+          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
+          myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition && myBall.yDirection > 0) {
+            setOfBricks[x][y] = 0;
+            myBall.yDirection = -myBall.yDirection;
+          }
+          // checks if hits right
+          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.height &&
+          myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition && myBall.xDirection < 0) {
+            setOfBricks[x][y] = 0;
+            myBall.xDirection = -myBall.xDirection;
+            myBall.yDirection = -myBall.yDirection;
+          }
+          // checks if hit left
+          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x + myBall.radius / 4 < this.xPosition + this.height &&
+          myBall.y - myBall.radius / 2 < this.yPosition + this.height && myBall.y - myBall.radius / 2 > this.yPosition && myBall.xDirection > 0) {
+            setOfBricks[x][y] = 0;
+            myBall.xDirection = -myBall.xDirection;
+            myBall.yDirection = -myBall.yDirection;
+          }
+        }
+      }
+    }
+  }
 }
 
 function mousePressed() {
