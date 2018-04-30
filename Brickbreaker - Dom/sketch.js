@@ -2,6 +2,7 @@
 let myPaddle;
 let myBall;
 let lifeCount;
+let myScore;
 
 // Sarvath's
 let bricks, aBrick;
@@ -13,6 +14,7 @@ function setup() {
   myPaddle = new Paddle();
   myBall = new Ball();
   lifeCount = new Lives(3);
+  myScore = new Score();
 
   // Sarvath
   bricks = new Brick();
@@ -31,6 +33,8 @@ function draw() {
   lifeCount.display();
   lifeCount.removeLives();
 
+  myScore.display();
+
   // Sarvath's
   bricks.makeBricks();
   bricks.removeBrick();
@@ -48,7 +52,7 @@ class Paddle {
     this.segmentx = [0, 1, 2, 3, 4, 5];
 
     // Movement variables
-    this.speed = 5;
+    this.speed = 6;
     this.direction = 0;
     this.left = false;
     this.right = false;
@@ -114,8 +118,8 @@ class Ball {
     this.radius = 25;
 
     // Movement variables
-    this.ySpeed = 4;
-    this.xSpeed = 4;
+    this.ySpeed = 6;
+    this.xSpeed = 6;
     this.xDirection = 1;
     this.yDirection = 1;
   }
@@ -256,6 +260,16 @@ class Lives {
   }
 }
 
+class Score{
+  constructor(){
+    this.amount = 0;
+  }
+
+  display(){
+    text("Score: " + this.amount, width - 150, height - 5);
+  }
+}
+
 function keyPressed() {
   // Checks to see if left arrow is pressed or if right arrow is pressed
   if (keyCode === LEFT_ARROW) {
@@ -287,10 +301,6 @@ function keyReleased() {
     myPaddle.right = false;
   }
 }
-
-class Score{
-
-}
 // SARVATH -------------------------------------------------------------------------------------------------------------------------------------------------
 class Brick {
   constructor() {
@@ -308,14 +318,18 @@ class Brick {
     strokeWeight(1);
     for (let x = 0; x < this.cols; x++) {
       for (let y = 0; y < this.rows; y++) {
-        if (setOfBricks[x][y] === 1) {
-          fill(255, 234, 45);
+        if (setOfBricks[x][y] === 3) {
+          fill(255, 0, 0);
           aBrick = rect(x * this.width, y * this.height, this.width, this.height);
         }
-        // if (setOfBricks[x][y] === 0) {
-        //   fill(0);
-        //   aBrick = rect(x * this.width, y * this.height, this.width, this.height);
-        // }
+        if (setOfBricks[x][y] === 2) {
+          fill(255, 75, 75);
+          aBrick = rect(x * this.width, y * this.height, this.width, this.height);
+        }
+        if (setOfBricks[x][y] === 1) {
+          fill(255, 150, 150);
+          aBrick = rect(x * this.width, y * this.height, this.width, this.height);
+        }
       }
     }
   }
@@ -324,7 +338,7 @@ class Brick {
     for (let x = 0; x < this.cols; x++) {
       setOfBricks.push([]);
       for (let y = 0; y < this.rows; y++) {
-        setOfBricks[x].push(1);
+        setOfBricks[x].push(3);
       }
     }
     return setOfBricks;
@@ -335,33 +349,49 @@ class Brick {
       for (let y = 0; y < this.rows; y++) {
         this.xPosition = x * this.width;
         this.yPosition = y * this.height;
-        if (setOfBricks[x][y] === 1) {
+        if (setOfBricks[x][y] === 1 || setOfBricks[x][y] === 2 || setOfBricks[x][y] === 3) {
           // check if bottom hits
           if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 2 < this.xPosition + this.width &&
-            myBall.y - myBall.radius / 2 < this.yPosition + this.height && myBall.y - myBall.radius / 2 > this.yPosition && myBall.yDirection < 0) {
-            setOfBricks[x][y] = 0;
+            myBall.y - myBall.radius / 2 > this.yPosition + this.height &&
+            myBall.y - myBall.radius / 2 + myBall.ySpeed * myBall.yDirection <= this.yPosition + this.height && myBall.yDirection < 0) {
+            setOfBricks[x][y] -= 1;
             myBall.yDirection = -myBall.yDirection;
+            if (setOfBricks[x][y] === 0){
+              myScore.amount += 10;
+            }
           }
 
           // checks if top was hit
           else if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 2 < this.xPosition + this.width &&
-            myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition && myBall.yDirection > 0) {
-            setOfBricks[x][y] = 0;
+            myBall.y + myBall.radius / 2 < this.yPosition &&
+            myBall.y + myBall.radius / 2 + myBall.ySpeed * myBall.yDirection >= this.yPosition && myBall.yDirection > 0) {
+            setOfBricks[x][y] -= 1;
             myBall.yDirection = -myBall.yDirection;
+            if (setOfBricks[x][y] === 0){
+              myScore.amount += 10;
+            }
           }
 
           // checks if hits right
-          else if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
-            myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition && myBall.xDirection < 0) {
-            setOfBricks[x][y] = 0;
+          else if (myBall.y + myBall.radius / 2 > this.yPosition && myBall.y - myBall.radius / 2 < this.yPosition + this.height &&
+            myBall.x - myBall.radius / 2 > this.xPosition + this.width &&
+            myBall.x - myBall.radius  / 2 + myBall.xSpeed * myBall.xDirection <= this.xPosition + this.width) {
+            setOfBricks[x][y] -= 1;
             myBall.xDirection = -myBall.xDirection;
+            if (setOfBricks[x][y] === 0){
+              myScore.amount += 10;
+            }
           }
 
           // checks if hit left
-          else if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
-            myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition && myBall.xDirection > 0) {
-            setOfBricks[x][y] = 0;
+          else if (myBall.y + myBall.radius / 2 > this.yPosition && myBall.y - myBall.radius / 2 < this.yPosition + this.height &&
+            myBall.x + myBall.radius / 2 < this.xPosition &&
+            myBall.x + myBall.radius / 2 + myBall.xSpeed * myBall.xDirection >= this.xPosition) {
+            setOfBricks[x][y] -= 1;
             myBall.xDirection = -myBall.xDirection;
+            if (setOfBricks[x][y] === 0){
+              myScore.amount += 10;
+            }
           }
         }
       }
