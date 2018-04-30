@@ -6,6 +6,7 @@ let lifeCount;
 // Sarvath's
 let bricks, aBrick;
 let setOfBricks = [];
+let timeLeft;
 
 function setup() {
   // Dom
@@ -17,6 +18,7 @@ function setup() {
   // Sarvath
   bricks = new Brick();
   bricks.create2dArray();
+  timeLeft = new Timer(500);
 }
 
 function draw() {
@@ -34,6 +36,11 @@ function draw() {
   // Sarvath's
   bricks.makeBricks();
   bricks.removeBrick();
+
+  timeLeft.display();
+  timeLeft.start();
+  timeLeft.reset(500);
+  timeLeft.isDone();
 }
 
 // Dom's
@@ -212,31 +219,6 @@ class Ball {
   }
 }
 
-class Timer {
-  constructor(waitTime) {
-    this.waitTime = waitTime;
-    this.startTime = millis();
-    this.finishTime = this.startTime + this.waitTime;
-    this.timerIsDone = false;
-  }
-
-  reset(newWaitTime) {
-    this.waitTime = newWaitTime;
-    this.startTime = millis();
-    this.finishTime = this.startTime + this.waitTime;
-    this.timerIsDone = false;
-  }
-
-  isDone() {
-    if (millis() >= this.finishTime) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-}
-
 class Lives {
   constructor(num) {
     this.lives = num;
@@ -315,6 +297,9 @@ class Brick {
         }
       }
     }
+    if (timeLeft.timerIsDone === true) {
+      this.rows += 1;
+    }
   }
 
   create2dArray() {
@@ -363,6 +348,42 @@ class Brick {
     }
   }
 }
+
+class Timer {
+  constructor(waitTime) {
+    this.waitTime = waitTime;
+    // this.startTime = millis();
+    // this.finishTime = this.startTime + this.waitTime;
+    this.timerIsDone = false;
+  }
+
+  start() {
+    this.startTime = millis();
+    this.finishTime = this.startTime + this.waitTime;
+    this.timerIsDone = false;
+  }
+
+  reset(newWaitTime) {
+    this.waitTime = newWaitTime;
+    this.startTime = millis();
+    this.finishTime = this.startTime + this.waitTime;
+    this.timerIsDone = false;
+  }
+
+  isDone() {
+    if (millis() >= this.finishTime) {
+      this.timerIsDone = true;
+      this.startTime = millis();
+    }
+    return this.timerIsDone;
+  }
+
+  display() {
+    fill(255);
+    text("Time Left: " + round(this.startTime), width - 300, height - 5);
+  }
+}
+
 
 function mousePressed() {
   let xcoord = floor(mouseX / bricks.width);
