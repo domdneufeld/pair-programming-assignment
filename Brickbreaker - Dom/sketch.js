@@ -3,7 +3,9 @@ let myPaddle;
 let myBall;
 let lifeCount;
 let myScore;
+let myMenu;
 
+let state = 0;
 // Sarvath's
 let bricks, aBrick;
 let setOfBricks = [];
@@ -15,6 +17,7 @@ function setup() {
   myBall = new Ball();
   lifeCount = new Lives(3);
   myScore = new Score();
+  myMenu = new Menu();
 
   // Sarvath
   bricks = new Brick();
@@ -23,21 +26,32 @@ function setup() {
 
 function draw() {
   background(100);
+  if (state === 0) {
+    myMenu.displayButton();
+    myMenu.checkIfMouseIsOverButton();
+  }
 
-  myPaddle.display();
-  myPaddle.move();
+  if (state === 1) {
+    myPaddle.display();
+    myPaddle.move();
 
-  myBall.display();
-  myBall.move();
+    myBall.display();
+    myBall.move();
 
-  lifeCount.display();
-  lifeCount.removeLives();
+    lifeCount.display();
+    lifeCount.removeLives();
+    lifeCount.checkForLoss();
 
-  myScore.display();
+    myScore.display();
 
-  // Sarvath's
-  bricks.makeBricks();
-  bricks.removeBrick();
+    // Sarvath's
+    bricks.makeBricks();
+    bricks.removeBrick();
+  }
+
+  if (state === 2){
+    myMenu.displayGameOver();
+  }
 }
 
 // Dom's
@@ -247,7 +261,9 @@ class Lives {
   }
 
   display() {
+    // Draws life count in bottom left corner
     textSize(32);
+    textAlign(LEFT, BOTTOM);
     text("Lives: " + this.lives, 5, height - 5);
   }
 
@@ -258,37 +274,92 @@ class Lives {
       myPaddle.resetPaddle();
     }
   }
+
+  checkForLoss(){
+    // Changes the game to loss screen when lives reaches zero
+    if (this.lives === 0){
+      state = 2;
+    }
+  }
 }
 
-class Score{
-  constructor(){
+class Score {
+  constructor() {
     this.amount = 0;
   }
 
-  display(){
-    text("Score: " + this.amount, width - 150, height - 5);
+  display() {
+    // Draws score in bottom right corner
+    textAlign(LEFT, BOTTOM);
+    text("Score: " + this.amount, width - 175, height - 5);
+  }
+}
+
+class Menu {
+  constructor() {
+    this.buttonx = width / 2;
+    this.buttony = height / 2;
+    this.buttonWidth = width / 4;
+    this.buttonHeight = width / 8;
+    this.isMouseOverButton = false;
+  }
+
+  displayButton() {
+    rectMode(CENTER);
+
+    fill(255);
+    // Changes the color of the button from white to grey if the mouse is over it
+    if (this.isMouseOverButton) {
+      fill(200);
+    }
+    // Draws the button in the middle of the screen
+    rect(this.buttonx, this.buttony, this.buttonWidth, this.buttonHeight);
+    fill(0);
+    textSize(48);
+    textAlign(CENTER, CENTER);
+    text("Play", this.buttonx, this.buttony);
+  }
+
+  checkIfMouseIsOverButton() {
+    // Checks to see if the mouse x and y are within the button
+    if (mouseX <= this.buttonx + this.buttonWidth / 2 && mouseX >= this.buttonx - this.buttonWidth / 2 &&
+      mouseY <= this.buttony + this.buttonHeight / 2 && mouseY >= this.buttony - this.buttonHeight / 2) {
+      this.isMouseOverButton = true;
+    }
+    else {
+      this.isMouseOverButton = false;
+    }
+  }
+  displayGameOver() {
+    // Writes game over and your score when you lose
+    textSize(48);
+    textAlign(CENTER, CENTER);
+    text("Your Score: " + myScore.amount, this.buttonx, this.buttony);
+
+    textSize(72);
+    text("Game Over", this.buttonx, this.buttony - 75);
   }
 }
 
 function keyPressed() {
   // Checks to see if left arrow is pressed or if right arrow is pressed
-  if (keyCode === LEFT_ARROW) {
-    myPaddle.left = true;
+  if (state === 1){
+    if (keyCode === LEFT_ARROW) {
+      myPaddle.left = true;
+    }
+
+    if (keyCode === RIGHT_ARROW) {
+      myPaddle.right = true;
+    }
+
+    // When the space bar is pressed it serves the ball
+    if (keyCode === 32 && myPaddle.state === 0) {
+      myPaddle.state = 1;
+      myBall.xDirection = 0;
+      myBall.yDirection = -1;
+    }
   }
 
-  if (keyCode === RIGHT_ARROW) {
-    myPaddle.right = true;
-  }
-
-  if (keyCode === UP_ARROW) {
-    myBall.yDirection = -myBall.yDirection;
-  }
-
-  if (keyCode === 32 && myPaddle.state === 0) {
-    myPaddle.state = 1;
-    myBall.xDirection = 0;
-    myBall.yDirection = -1;
-  }
 }
 
 function keyReleased() {
@@ -299,6 +370,12 @@ function keyReleased() {
 
   if (keyCode === RIGHT_ARROW) {
     myPaddle.right = false;
+  }
+}
+
+function mousePressed(){
+  if (state === 0 && myMenu.isMouseOverButton){
+    state = 1;
   }
 }
 // SARVATH -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -333,6 +410,10 @@ class Brick {
       }
     }
   }
+  
+  addRow(){
+
+  }
 
   create2dArray() {
     for (let x = 0; x < this.cols; x++) {
@@ -356,7 +437,7 @@ class Brick {
             myBall.y - myBall.radius / 2 + myBall.ySpeed * myBall.yDirection <= this.yPosition + this.height && myBall.yDirection < 0) {
             setOfBricks[x][y] -= 1;
             myBall.yDirection = -myBall.yDirection;
-            if (setOfBricks[x][y] === 0){
+            if (setOfBricks[x][y] === 0) {
               myScore.amount += 10;
             }
           }
@@ -367,7 +448,7 @@ class Brick {
             myBall.y + myBall.radius / 2 + myBall.ySpeed * myBall.yDirection >= this.yPosition && myBall.yDirection > 0) {
             setOfBricks[x][y] -= 1;
             myBall.yDirection = -myBall.yDirection;
-            if (setOfBricks[x][y] === 0){
+            if (setOfBricks[x][y] === 0) {
               myScore.amount += 10;
             }
           }
@@ -375,10 +456,10 @@ class Brick {
           // checks if hits right
           else if (myBall.y + myBall.radius / 2 > this.yPosition && myBall.y - myBall.radius / 2 < this.yPosition + this.height &&
             myBall.x - myBall.radius / 2 > this.xPosition + this.width &&
-            myBall.x - myBall.radius  / 2 + myBall.xSpeed * myBall.xDirection <= this.xPosition + this.width) {
+            myBall.x - myBall.radius / 2 + myBall.xSpeed * myBall.xDirection <= this.xPosition + this.width) {
             setOfBricks[x][y] -= 1;
             myBall.xDirection = -myBall.xDirection;
-            if (setOfBricks[x][y] === 0){
+            if (setOfBricks[x][y] === 0) {
               myScore.amount += 10;
             }
           }
@@ -389,21 +470,12 @@ class Brick {
             myBall.x + myBall.radius / 2 + myBall.xSpeed * myBall.xDirection >= this.xPosition) {
             setOfBricks[x][y] -= 1;
             myBall.xDirection = -myBall.xDirection;
-            if (setOfBricks[x][y] === 0){
+            if (setOfBricks[x][y] === 0) {
               myScore.amount += 10;
             }
           }
         }
       }
     }
-  }
-}
-
-function mousePressed() {
-  let xcoord = floor(mouseX / bricks.width);
-  let ycoord = floor(mouseY / bricks.height);
-
-  if (setOfBricks[xcoord][ycoord] === 1) {
-    setOfBricks[xcoord][ycoord] = 0;
   }
 }
