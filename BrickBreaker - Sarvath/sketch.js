@@ -18,7 +18,7 @@ function setup() {
   // Sarvath
   bricks = new Brick();
   bricks.create2dArray();
-  timeLeft = new Timer(500);
+  timeLeft = new Timer(5000);
 }
 
 function draw() {
@@ -39,7 +39,7 @@ function draw() {
 
   timeLeft.display();
   timeLeft.start();
-  timeLeft.reset(500);
+  timeLeft.reset(20000);
   timeLeft.isDone();
 }
 
@@ -284,6 +284,9 @@ class Brick {
     rectMode(CORNER);
     stroke(0);
     strokeWeight(1);
+    if (timeLeft.timerIsDone === true) {
+      this.rows += 1;
+    }
     for (let x = 0; x < this.cols; x++) {
       for (let y = 0; y < this.rows; y++) {
         if (setOfBricks[x][y] === 1) {
@@ -297,9 +300,6 @@ class Brick {
         }
       }
     }
-    if (timeLeft.timerIsDone === true) {
-      this.rows += 1;
-    }
   }
 
   create2dArray() {
@@ -310,6 +310,10 @@ class Brick {
       }
     }
     return setOfBricks;
+  }
+
+  createEmpty2DArray() {
+
   }
 
   // Sarvath
@@ -352,8 +356,8 @@ class Brick {
 class Timer {
   constructor(waitTime) {
     this.waitTime = waitTime;
-    // this.startTime = millis();
-    // this.finishTime = this.startTime + this.waitTime;
+    this.startTime = millis();
+    this.finishTime = this.startTime + this.waitTime;
     this.timerIsDone = false;
   }
 
@@ -381,15 +385,5 @@ class Timer {
   display() {
     fill(255);
     text("Time Left: " + round(this.startTime), width - 300, height - 5);
-  }
-}
-
-
-function mousePressed() {
-  let xcoord = floor(mouseX / bricks.width);
-  let ycoord = floor(mouseY / bricks.height);
-
-  if (setOfBricks[xcoord][ycoord] === 1) {
-    setOfBricks[xcoord][ycoord] = 0;
   }
 }
