@@ -9,6 +9,7 @@ let state = 0;
 // Sarvath's
 let bricks, aBrick;
 let setOfBricks = [];
+let newArray;
 
 function setup() {
   // Dom
@@ -49,7 +50,7 @@ function draw() {
     bricks.removeBrick();
   }
 
-  if (state === 2){
+  if (state === 2) {
     myMenu.displayGameOver();
   }
 }
@@ -275,9 +276,9 @@ class Lives {
     }
   }
 
-  checkForLoss(){
+  checkForLoss() {
     // Changes the game to loss screen when lives reaches zero
-    if (this.lives === 0){
+    if (this.lives === 0) {
       state = 2;
     }
   }
@@ -343,7 +344,7 @@ class Menu {
 
 function keyPressed() {
   // Checks to see if left arrow is pressed or if right arrow is pressed
-  if (state === 1){
+  if (state === 1) {
     if (keyCode === LEFT_ARROW) {
       myPaddle.left = true;
     }
@@ -373,14 +374,19 @@ function keyReleased() {
   }
 }
 
-function mousePressed(){
-  if (state === 0 && myMenu.isMouseOverButton){
+function mousePressed() {
+  if (state === 0 && myMenu.isMouseOverButton) {
     state = 1;
+  }
+
+  else if (state === 1){
+    bricks.addRow();
   }
 }
 // SARVATH -------------------------------------------------------------------------------------------------------------------------------------------------
 class Brick {
   constructor() {
+    this.initialRows = 4;
     this.rows = 4;
     this.cols = 8;
     this.width = width / 8;
@@ -410,9 +416,22 @@ class Brick {
       }
     }
   }
-  
-  addRow(){
 
+  addRow() {
+    this.rows += 1;
+    newArray = [];
+    for (let x = 0; x < this.cols; x++) {
+      newArray.push([]);
+      for (let y = 0; y < this.rows; y++) {
+        if (y < 1){
+          newArray[x].push(3);
+        }
+        else{
+          newArray[x].push(setOfBricks[x][y - 1]);
+        }
+      }
+    }
+    setOfBricks = newArray;
   }
 
   create2dArray() {
