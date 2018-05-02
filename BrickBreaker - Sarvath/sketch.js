@@ -2,11 +2,14 @@
 let myPaddle;
 let myBall;
 let lifeCount;
+let myScore;
+let myMenu;
 
+let state = 0;
 // Sarvath's
 let bricks, aBrick;
 let setOfBricks = [];
-let timeLeft;
+let newArray = [];
 
 function setup() {
   // Dom
@@ -14,33 +17,42 @@ function setup() {
   myPaddle = new Paddle();
   myBall = new Ball();
   lifeCount = new Lives(3);
+  myScore = new Score();
+  myMenu = new Menu();
 
   // Sarvath
   bricks = new Brick();
   bricks.create2dArray();
-  timeLeft = new Timer(5000);
 }
 
 function draw() {
   background(100);
+  if (state === 0) {
+    myMenu.displayButton();
+    myMenu.checkIfMouseIsOverButton();
+  }
 
-  myPaddle.display();
-  myPaddle.move();
+  if (state === 1) {
+    myPaddle.display();
+    myPaddle.move();
 
-  myBall.display();
-  myBall.move();
+    myBall.display();
+    myBall.move();
 
-  lifeCount.display();
-  lifeCount.removeLives();
+    lifeCount.display();
+    lifeCount.removeLives();
+    lifeCount.checkForLoss();
 
-  // Sarvath's
-  bricks.makeBricks();
-  bricks.removeBrick();
+    myScore.display();
 
-  timeLeft.display();
-  timeLeft.start();
-  timeLeft.reset(20000);
-  timeLeft.isDone();
+    // Sarvath's
+    bricks.makeBricks();
+    bricks.removeBrick();
+  }
+
+  if (state === 2){
+    myMenu.displayGameOver();
+  }
 }
 
 // Dom's
@@ -55,7 +67,7 @@ class Paddle {
     this.segmentx = [0, 1, 2, 3, 4, 5];
 
     // Movement variables
-    this.speed = 5;
+    this.speed = 6;
     this.direction = 0;
     this.left = false;
     this.right = false;
@@ -121,8 +133,8 @@ class Ball {
     this.radius = 25;
 
     // Movement variables
-    this.ySpeed = 4;
-    this.xSpeed = 4;
+    this.ySpeed = 6;
+    this.xSpeed = 6;
     this.xDirection = 1;
     this.yDirection = 1;
   }
@@ -219,149 +231,9 @@ class Ball {
   }
 }
 
-class Lives {
-  constructor(num) {
-    this.lives = num;
-  }
-
-  display() {
-    textSize(32);
-    text("Lives: " + this.lives, 5, height - 5);
-  }
-
-  removeLives() {
-    // Subtracts the amount of lives by one when the ball reaches the bottom
-    if (myBall.y > height) {
-      this.lives -= 1;
-      myPaddle.resetPaddle();
-    }
-  }
-}
-
-function keyPressed() {
-  // Checks to see if left arrow is pressed or if right arrow is pressed
-  if (keyCode === LEFT_ARROW) {
-    myPaddle.left = true;
-  }
-
-  if (keyCode === RIGHT_ARROW) {
-    myPaddle.right = true;
-  }
-
-  if (keyCode === 32) {
-    myPaddle.state = 1;
-    myBall.xDirection = 0;
-    myBall.yDirection = -1;
-  }
-}
-
-function keyReleased() {
-  // Checks to see if left arrow is released or if right arrow is released
-  if (keyCode === LEFT_ARROW) {
-    myPaddle.left = false;
-  }
-
-  if (keyCode === RIGHT_ARROW) {
-    myPaddle.right = false;
-  }
-
-}
-
-// SARVATH -------------------------------------------------------------------------------------------------------------------------------------------------
-class Brick {
-  constructor() {
-    this.rows = 4;
-    this.cols = 8;
-    this.width = width / 8;
-    this.height = height / 16;
-    this.state = 0;
-    this.r = random(255);
-    this.g = random(255);
-    this.b = random(255);
-  }
-
-  makeBricks() {
-    rectMode(CORNER);
-    stroke(0);
-    strokeWeight(1);
-    if (timeLeft.timerIsDone === true) {
-      this.rows += 1;
-    }
-    for (let x = 0; x < this.cols; x++) {
-      for (let y = 0; y < this.rows; y++) {
-        if (setOfBricks[x][y] === 1) {
-          if (y % 2 === 0) {
-            fill(this.r, this.g, this.b);
-          }
-          else {
-            fill(this.b, this.g, this.r);
-          }
-          aBrick = rect(x * this.width, y * this.height, this.width, this.height);
-        }
-      }
-    }
-  }
-
-  create2dArray() {
-    for (let x = 0; x < this.cols; x++) {
-      setOfBricks.push([]);
-      for (let y = 0; y < this.rows; y++) {
-        setOfBricks[x].push(1);
-      }
-    }
-    return setOfBricks;
-  }
-
-  createEmpty2DArray() {
-
-  }
-
-  // Sarvath
-  removeBrick() {
-    for (let x = 0; x < this.cols; x++) {
-      for (let y = 0; y < this.rows; y++) {
-        this.xPosition = x * this.width;
-        this.yPosition = y * this.height;
-        if (setOfBricks[x][y] === 1) {
-          //check if bottom hits
-          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
-            myBall.y - myBall.radius / 2 < this.yPosition + this.height && myBall.y - myBall.radius / 2 > this.yPosition && myBall.yDirection < 0) {
-            setOfBricks[x][y] = 0;
-            myBall.yDirection = -myBall.yDirection;
-          }
-          // checks if top was hit
-          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.width &&
-            myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition && myBall.yDirection > 0) {
-            setOfBricks[x][y] = 0;
-            myBall.yDirection = -myBall.yDirection;
-          }
-          // checks if hits right
-          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x - myBall.radius / 4 < this.xPosition + this.height &&
-            myBall.y + myBall.radius / 2 < this.yPosition + this.height && myBall.y + myBall.radius / 2 > this.yPosition) {
-            setOfBricks[x][y] = 0;
-            myBall.xDirection = -myBall.xDirection;
-          }
-          // checks if hit left
-          if (myBall.x + myBall.radius / 4 > this.xPosition && myBall.x + myBall.radius / 4 < this.xPosition + this.height &&
-            myBall.y - myBall.radius / 2 < this.yPosition + this.height && myBall.y - myBall.radius / 2 > this.yPosition && myBall.xDirection > 0) {
-            setOfBricks[x][y] = 0;
-            myBall.xDirection = -myBall.xDirection;
-          }
-        }
-      }
-    }
-  }
-}
-
 class Timer {
   constructor(waitTime) {
     this.waitTime = waitTime;
-    this.startTime = millis();
-    this.finishTime = this.startTime + this.waitTime;
-    this.timerIsDone = false;
-  }
-
-  start() {
     this.startTime = millis();
     this.finishTime = this.startTime + this.waitTime;
     this.timerIsDone = false;
@@ -376,14 +248,243 @@ class Timer {
 
   isDone() {
     if (millis() >= this.finishTime) {
-      this.timerIsDone = true;
-      this.startTime = millis();
+      return true;
     }
-    return this.timerIsDone;
+    else {
+      return false;
+    }
+  }
+}
+
+class Lives {
+  constructor(num) {
+    this.lives = num;
   }
 
   display() {
+    // Draws life count in bottom left corner
+    textSize(32);
+    textAlign(LEFT, BOTTOM);
+    text("Lives: " + this.lives, 5, height - 5);
+  }
+
+  removeLives() {
+    // Subtracts the amount of lives by one when the ball reaches the bottom
+    if (myBall.y > height) {
+      this.lives -= 1;
+      myPaddle.resetPaddle();
+    }
+  }
+
+  checkForLoss(){
+    // Changes the game to loss screen when lives reaches zero
+    if (this.lives === 0){
+      state = 2;
+    }
+  }
+}
+
+class Score {
+  constructor() {
+    this.amount = 0;
+  }
+
+  display() {
+    // Draws score in bottom right corner
+    textAlign(LEFT, BOTTOM);
+    text("Score: " + this.amount, width - 175, height - 5);
+  }
+}
+
+class Menu {
+  constructor() {
+    this.buttonx = width / 2;
+    this.buttony = height / 2;
+    this.buttonWidth = width / 4;
+    this.buttonHeight = width / 8;
+    this.isMouseOverButton = false;
+  }
+
+  displayButton() {
+    rectMode(CENTER);
+
     fill(255);
-    text("Time Left: " + round(this.startTime), width - 300, height - 5);
+    // Changes the color of the button from white to grey if the mouse is over it
+    if (this.isMouseOverButton) {
+      fill(200);
+    }
+    // Draws the button in the middle of the screen
+    rect(this.buttonx, this.buttony, this.buttonWidth, this.buttonHeight);
+    fill(0);
+    textSize(48);
+    textAlign(CENTER, CENTER);
+    text("Play", this.buttonx, this.buttony);
+  }
+
+  checkIfMouseIsOverButton() {
+    // Checks to see if the mouse x and y are within the button
+    if (mouseX <= this.buttonx + this.buttonWidth / 2 && mouseX >= this.buttonx - this.buttonWidth / 2 &&
+      mouseY <= this.buttony + this.buttonHeight / 2 && mouseY >= this.buttony - this.buttonHeight / 2) {
+      this.isMouseOverButton = true;
+    }
+    else {
+      this.isMouseOverButton = false;
+    }
+  }
+  displayGameOver() {
+    // Writes game over and your score when you lose
+    textSize(48);
+    textAlign(CENTER, CENTER);
+    text("Your Score: " + myScore.amount, this.buttonx, this.buttony);
+
+    textSize(72);
+    text("Game Over", this.buttonx, this.buttony - 75);
+  }
+}
+
+function keyPressed() {
+  // Checks to see if left arrow is pressed or if right arrow is pressed
+  if (state === 1){
+    if (keyCode === LEFT_ARROW) {
+      myPaddle.left = true;
+    }
+
+    if (keyCode === RIGHT_ARROW) {
+      myPaddle.right = true;
+    }
+
+    // When the space bar is pressed it serves the ball
+    if (keyCode === 32 && myPaddle.state === 0) {
+      myPaddle.state = 1;
+      myBall.xDirection = 0;
+      myBall.yDirection = -1;
+    }
+  }
+
+}
+
+function keyReleased() {
+  // Checks to see if left arrow is released or if right arrow is released
+  if (keyCode === LEFT_ARROW) {
+    myPaddle.left = false;
+  }
+
+  if (keyCode === RIGHT_ARROW) {
+    myPaddle.right = false;
+  }
+}
+
+function mousePressed(){
+  if (state === 0 && myMenu.isMouseOverButton){
+    state = 1;
+  }
+  bricks.addRow();
+}
+// SARVATH -------------------------------------------------------------------------------------------------------------------------------------------------
+class Brick {
+  constructor() {
+    this.rows = 4;
+    this.newRows = this.rows + 1;
+    this.cols = 8;
+    this.width = width / 8;
+    this.height = height / 16;
+    this.hit = false;
+    this.state = 0;
+  }
+
+  makeBricks() {
+    rectMode(CORNER);
+    stroke(0);
+    strokeWeight(1);
+    for (let x = 0; x < this.cols; x++) {
+      for (let y = 0; y < this.rows; y++) {
+        if (setOfBricks[x][y] === 3) {
+          fill(255, 0, 0);
+          aBrick = rect(x * this.width, y * this.height, this.width, this.height);
+        }
+        if (setOfBricks[x][y] === 2) {
+          fill(255, 75, 75);
+          aBrick = rect(x * this.width, y * this.height, this.width, this.height);
+        }
+        if (setOfBricks[x][y] === 1) {
+          fill(255, 150, 150);
+          aBrick = rect(x * this.width, y * this.height, this.width, this.height);
+        }
+      }
+    }
+  }
+
+  addRow() {
+    for (let x = 0; x < this.cols; x++) {
+      newArray.push([]);
+      for (let y = 0; y < this.newRows; y++) {
+        newArray[x].push(3);
+      }
+    }
+    concat(setOfBricks, newArray);
+  }
+
+  create2dArray() {
+    for (let x = 0; x < this.cols; x++) {
+      setOfBricks.push([]);
+      for (let y = 0; y < this.rows; y++) {
+        setOfBricks[x].push(3);
+      }
+    }
+    return setOfBricks;
+  }
+
+  removeBrick() {
+    for (let x = 0; x < this.cols; x++) {
+      for (let y = 0; y < this.rows; y++) {
+        this.xPosition = x * this.width;
+        this.yPosition = y * this.height;
+        if (setOfBricks[x][y] === 1 || setOfBricks[x][y] === 2 || setOfBricks[x][y] === 3) {
+          // check if bottom hits
+          if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 2 < this.xPosition + this.width &&
+            myBall.y - myBall.radius / 2 > this.yPosition + this.height &&
+            myBall.y - myBall.radius / 2 + myBall.ySpeed * myBall.yDirection <= this.yPosition + this.height && myBall.yDirection < 0) {
+            setOfBricks[x][y] -= 1;
+            myBall.yDirection = -myBall.yDirection;
+            if (setOfBricks[x][y] === 0) {
+              myScore.amount += 10;
+            }
+          }
+
+          // checks if top was hit
+          else if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 2 < this.xPosition + this.width &&
+            myBall.y + myBall.radius / 2 < this.yPosition &&
+            myBall.y + myBall.radius / 2 + myBall.ySpeed * myBall.yDirection >= this.yPosition && myBall.yDirection > 0) {
+            setOfBricks[x][y] -= 1;
+            myBall.yDirection = -myBall.yDirection;
+            if (setOfBricks[x][y] === 0) {
+              myScore.amount += 10;
+            }
+          }
+
+          // checks if hits right
+          else if (myBall.y + myBall.radius / 2 > this.yPosition && myBall.y - myBall.radius / 2 < this.yPosition + this.height &&
+            myBall.x - myBall.radius / 2 > this.xPosition + this.width &&
+            myBall.x - myBall.radius / 2 + myBall.xSpeed * myBall.xDirection <= this.xPosition + this.width) {
+            setOfBricks[x][y] -= 1;
+            myBall.xDirection = -myBall.xDirection;
+            if (setOfBricks[x][y] === 0) {
+              myScore.amount += 10;
+            }
+          }
+
+          // checks if hit left
+          else if (myBall.y + myBall.radius / 2 > this.yPosition && myBall.y - myBall.radius / 2 < this.yPosition + this.height &&
+            myBall.x + myBall.radius / 2 < this.xPosition &&
+            myBall.x + myBall.radius / 2 + myBall.xSpeed * myBall.xDirection >= this.xPosition) {
+            setOfBricks[x][y] -= 1;
+            myBall.xDirection = -myBall.xDirection;
+            if (setOfBricks[x][y] === 0) {
+              myScore.amount += 10;
+            }
+          }
+        }
+      }
+    }
   }
 }
