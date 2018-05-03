@@ -397,10 +397,6 @@ function mousePressed() {
   if (state === 0 && myMenu.isMouseOverButton) {
     state = 1;
   }
-
-  else if (state === 1) {
-    bricks.addRow();
-  }
 }
 // SARVATH -------------------------------------------------------------------------------------------------------------------------------------------------
 class Brick {
@@ -486,7 +482,7 @@ class Brick {
         this.yPosition = y * this.height;
         if (setOfBricks[x][y] > 0) {
           // check if bottom hits
-          if (myBall.x + myBall.radius / 2 + myBall.xSpeed * myBall.xDirection > this.xPosition && 
+          if (myBall.x + myBall.radius / 2 + myBall.xSpeed * myBall.xDirection > this.xPosition &&
             myBall.x - myBall.radius / 2 + myBall.xSpeed * myBall.xDirection < this.xPosition + this.width &&
             myBall.y - myBall.radius / 2 > this.yPosition + this.height &&
             myBall.y - myBall.radius / 2 + myBall.ySpeed * myBall.yDirection <= this.yPosition + this.height && myBall.yDirection < 0) {
