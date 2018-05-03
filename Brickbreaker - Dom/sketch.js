@@ -5,7 +5,7 @@ let lifeCount;
 let myScore;
 let myMenu;
 
-let state = 0;
+let state = 0; // 0 = pre game menu, 1 = game, 2 =
 // Sarvath's
 let bricks, aBrick;
 let setOfBricks = [];
@@ -135,18 +135,24 @@ class Paddle {
   }
 
   hitCounter() {
+    // Each time the ball hits the paddle the counter goes up
     this.hitCount += 1;
+    // Every 12 hits a new row is added
     if (this.hitCount % 12 === 0) {
       bricks.addRow();
     }
+    // Every 6 hits the speed of the ball increases
     if (this.hitCount % 6 === 0){
       myBall.xSpeed += 0.25;
       myBall.ySpeed += 0.25;
     }
-    if (this.hitCount % 16 === 0){
+    // Every 18 hits the amount of damage that you do to the bricks increases
+    if (this.hitCount % 18 === 0){
       myBall.hitPower += 1;
     }
-    if (this.hitCount % 20 === 0 && bricks.strength < 5){
+    // Every 24 hits the new row spawned will take one extra hit to destroy
+    // This caps at 5, and doesn't reset if you lose a life
+    if (this.hitCount % 24 === 0 && bricks.strength < 5){
       bricks.strength += 1;
     }
   }
@@ -453,6 +459,15 @@ class Brick {
       }
     }
     setOfBricks = newArray;
+
+    // Checks to see if the new row reaches the bottom
+    if (this.rows >= 13){
+      for (let x = 0; x < this.cols; x++){
+        if (setOfBricks[x][13] > 0){
+          state = 2;
+        }
+      }
+    }
   }
 
   create2dArray() {
