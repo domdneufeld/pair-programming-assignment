@@ -74,6 +74,9 @@ class Paddle {
 
     // State variable
     this.state = 0; // 0 = before serve, 1 = after serve
+
+    // Counts each time the ball hits the paddle
+    this.hitCount = 0;
   }
 
   display() {
@@ -119,9 +122,33 @@ class Paddle {
   }
 
   resetPaddle() {
+    // Resets the paddle
     this.state = 0;
+    this.hitCount = 0;
     this.x = width / 2;
     this.y = height - height / 8;
+
+    // Resets the ball speed and power
+    myBall.ySpeed = 6;
+    myBall.xSpeed = 6;
+    myBall.hitPower = 1;
+  }
+
+  hitCounter() {
+    this.hitCount += 1;
+    if (this.hitCount % 12 === 0) {
+      bricks.addRow();
+    }
+    if (this.hitCount % 6 === 0){
+      myBall.xSpeed += 0.25;
+      myBall.ySpeed += 0.25;
+    }
+    if (this.hitCount % 16 === 0){
+      myBall.hitPower += 1;
+    }
+    if (this.hitCount % 20 === 0 && bricks.strength < 5){
+      bricks.strength += 1;
+    }
   }
 }
 
@@ -137,6 +164,10 @@ class Ball {
     this.xSpeed = 6;
     this.xDirection = 1;
     this.yDirection = 1;
+
+    // Power up variable
+    this.hitPower = 1;
+
   }
 
   display() {
@@ -171,6 +202,7 @@ class Ball {
         if (this.y < myPaddle.y + myPaddle.height / 2 && this.yDirection > 0) {
           this.yDirection = -this.yDirection;
           this.xDirection = -1;
+          myPaddle.hitCounter();
         }
       }
 
@@ -181,6 +213,7 @@ class Ball {
         if (this.y < myPaddle.y + myPaddle.height / 2 && this.yDirection > 0) {
           this.yDirection = -this.yDirection;
           this.xDirection = -0.67;
+          myPaddle.hitCounter();
         }
       }
 
@@ -191,6 +224,7 @@ class Ball {
         if (this.y < myPaddle.y + myPaddle.height / 2 && this.yDirection > 0) {
           this.yDirection = -this.yDirection;
           this.xDirection = -0.33;
+          myPaddle.hitCounter();
         }
       }
 
@@ -201,6 +235,7 @@ class Ball {
         if (this.y < myPaddle.y + myPaddle.height / 2 && this.yDirection > 0) {
           this.yDirection = -this.yDirection;
           this.xDirection = 0.33;
+          myPaddle.hitCounter();
         }
       }
 
@@ -211,6 +246,7 @@ class Ball {
         if (this.y < myPaddle.y + myPaddle.height / 2 && this.yDirection > 0) {
           this.yDirection = -this.yDirection;
           this.xDirection = 0.67;
+          myPaddle.hitCounter();
         }
       }
 
@@ -221,37 +257,13 @@ class Ball {
         if (this.y < myPaddle.y + myPaddle.height / 2 && this.yDirection > 0) {
           this.yDirection = -this.yDirection;
           this.xDirection = 1;
+          myPaddle.hitCounter();
         }
       }
 
       // Moves the ball
       this.x += this.xDirection * this.xSpeed;
       this.y += this.yDirection * this.ySpeed;
-    }
-  }
-}
-
-class Timer {
-  constructor(waitTime) {
-    this.waitTime = waitTime;
-    this.startTime = millis();
-    this.finishTime = this.startTime + this.waitTime;
-    this.timerIsDone = false;
-  }
-
-  reset(newWaitTime) {
-    this.waitTime = newWaitTime;
-    this.startTime = millis();
-    this.finishTime = this.startTime + this.waitTime;
-    this.timerIsDone = false;
-  }
-
-  isDone() {
-    if (millis() >= this.finishTime) {
-      return true;
-    }
-    else {
-      return false;
     }
   }
 }
@@ -333,6 +345,7 @@ class Menu {
   }
   displayGameOver() {
     // Writes game over and your score when you lose
+    fill(0, 255, 0);
     textSize(48);
     textAlign(CENTER, CENTER);
     text("Your Score: " + myScore.amount, this.buttonx, this.buttony);
@@ -379,20 +392,20 @@ function mousePressed() {
     state = 1;
   }
 
-  else if (state === 1){
+  else if (state === 1) {
     bricks.addRow();
   }
 }
 // SARVATH -------------------------------------------------------------------------------------------------------------------------------------------------
 class Brick {
   constructor() {
-    this.initialRows = 4;
     this.rows = 4;
     this.cols = 8;
     this.width = width / 8;
     this.height = height / 16;
     this.hit = false;
     this.state = 0;
+    this.strength = 3;
   }
 
   makeBricks() {
@@ -401,16 +414,24 @@ class Brick {
     strokeWeight(1);
     for (let x = 0; x < this.cols; x++) {
       for (let y = 0; y < this.rows; y++) {
-        if (setOfBricks[x][y] === 3) {
-          fill(255, 0, 0);
+        if (setOfBricks[x][y] === 5) {
+          fill(200, 0, 255);
           aBrick = rect(x * this.width, y * this.height, this.width, this.height);
         }
-        if (setOfBricks[x][y] === 2) {
-          fill(255, 75, 75);
+        else if (setOfBricks[x][y] === 4) {
+          fill(100, 0, 200);
           aBrick = rect(x * this.width, y * this.height, this.width, this.height);
         }
-        if (setOfBricks[x][y] === 1) {
-          fill(255, 150, 150);
+        else if (setOfBricks[x][y] === 3) {
+          fill(0, 0, 255);
+          aBrick = rect(x * this.width, y * this.height, this.width, this.height);
+        }
+        else if (setOfBricks[x][y] === 2) {
+          fill(0, 150, 255);
+          aBrick = rect(x * this.width, y * this.height, this.width, this.height);
+        }
+        else if (setOfBricks[x][y] === 1) {
+          fill(0, 255, 255);
           aBrick = rect(x * this.width, y * this.height, this.width, this.height);
         }
       }
@@ -423,10 +444,10 @@ class Brick {
     for (let x = 0; x < this.cols; x++) {
       newArray.push([]);
       for (let y = 0; y < this.rows; y++) {
-        if (y < 1){
-          newArray[x].push(3);
+        if (y < 1) {
+          newArray[x].push(this.strength);
         }
-        else{
+        else {
           newArray[x].push(setOfBricks[x][y - 1]);
         }
       }
@@ -438,7 +459,7 @@ class Brick {
     for (let x = 0; x < this.cols; x++) {
       setOfBricks.push([]);
       for (let y = 0; y < this.rows; y++) {
-        setOfBricks[x].push(3);
+        setOfBricks[x].push(this.strength);
       }
     }
     return setOfBricks;
@@ -449,14 +470,14 @@ class Brick {
       for (let y = 0; y < this.rows; y++) {
         this.xPosition = x * this.width;
         this.yPosition = y * this.height;
-        if (setOfBricks[x][y] === 1 || setOfBricks[x][y] === 2 || setOfBricks[x][y] === 3) {
+        if (setOfBricks[x][y] > 0) {
           // check if bottom hits
           if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 2 < this.xPosition + this.width &&
             myBall.y - myBall.radius / 2 > this.yPosition + this.height &&
             myBall.y - myBall.radius / 2 + myBall.ySpeed * myBall.yDirection <= this.yPosition + this.height && myBall.yDirection < 0) {
-            setOfBricks[x][y] -= 1;
+            setOfBricks[x][y] -= 1 * myBall.hitPower;
             myBall.yDirection = -myBall.yDirection;
-            if (setOfBricks[x][y] === 0) {
+            if (setOfBricks[x][y] <= 0) {
               myScore.amount += 10;
             }
           }
@@ -465,7 +486,7 @@ class Brick {
           else if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 2 < this.xPosition + this.width &&
             myBall.y + myBall.radius / 2 < this.yPosition &&
             myBall.y + myBall.radius / 2 + myBall.ySpeed * myBall.yDirection >= this.yPosition && myBall.yDirection > 0) {
-            setOfBricks[x][y] -= 1;
+            setOfBricks[x][y] -= 1 * myBall.hitPower;
             myBall.yDirection = -myBall.yDirection;
             if (setOfBricks[x][y] === 0) {
               myScore.amount += 10;
@@ -476,7 +497,7 @@ class Brick {
           else if (myBall.y + myBall.radius / 2 > this.yPosition && myBall.y - myBall.radius / 2 < this.yPosition + this.height &&
             myBall.x - myBall.radius / 2 > this.xPosition + this.width &&
             myBall.x - myBall.radius / 2 + myBall.xSpeed * myBall.xDirection <= this.xPosition + this.width) {
-            setOfBricks[x][y] -= 1;
+            setOfBricks[x][y] -= 1 * myBall.hitPower;
             myBall.xDirection = -myBall.xDirection;
             if (setOfBricks[x][y] === 0) {
               myScore.amount += 10;
@@ -487,7 +508,7 @@ class Brick {
           else if (myBall.y + myBall.radius / 2 > this.yPosition && myBall.y - myBall.radius / 2 < this.yPosition + this.height &&
             myBall.x + myBall.radius / 2 < this.xPosition &&
             myBall.x + myBall.radius / 2 + myBall.xSpeed * myBall.xDirection >= this.xPosition) {
-            setOfBricks[x][y] -= 1;
+            setOfBricks[x][y] -= 1 * myBall.hitPower;
             myBall.xDirection = -myBall.xDirection;
             if (setOfBricks[x][y] === 0) {
               myScore.amount += 10;
