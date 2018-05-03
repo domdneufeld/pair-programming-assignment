@@ -10,6 +10,7 @@ let state = 0;
 let bricks, aBrick;
 let setOfBricks = [];
 let newArray = [];
+let timeLeft;
 
 function setup() {
   // Dom
@@ -23,6 +24,7 @@ function setup() {
   // Sarvath
   bricks = new Brick();
   bricks.create2dArray();
+  timeLeft = new Timer(5000);
 }
 
 function draw() {
@@ -48,6 +50,14 @@ function draw() {
     // Sarvath's
     bricks.makeBricks();
     bricks.removeBrick();
+    if (timeLeft.timerIsDone === true) {
+      // If a certain time has passed, bricks will start to appear
+      bricks.addRows();
+    }
+
+    timeLeft.display();
+    timeLeft.reset(2000);
+    timeLeft.isDone();
   }
 
   if (state === 2){
@@ -231,31 +241,6 @@ class Ball {
   }
 }
 
-class Timer {
-  constructor(waitTime) {
-    this.waitTime = waitTime;
-    this.startTime = millis();
-    this.finishTime = this.startTime + this.waitTime;
-    this.timerIsDone = false;
-  }
-
-  reset(newWaitTime) {
-    this.waitTime = newWaitTime;
-    this.startTime = millis();
-    this.finishTime = this.startTime + this.waitTime;
-    this.timerIsDone = false;
-  }
-
-  isDone() {
-    if (millis() >= this.finishTime) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-}
-
 class Lives {
   constructor(num) {
     this.lives = num;
@@ -378,10 +363,13 @@ function mousePressed(){
   if (state === 0 && myMenu.isMouseOverButton){
     state = 1;
   }
-  bricks.addRow();
+  else if (state === 1) {
+    bricks.addRow();
+  }
 }
 // SARVATH -------------------------------------------------------------------------------------------------------------------------------------------------
 class Brick {
+  // This Brick class allows the bricks to appear and dissapear according to certain parametres
   constructor() {
     this.rows = 4;
     this.newRows = this.rows + 1;
@@ -393,11 +381,13 @@ class Brick {
   }
 
   makeBricks() {
+    // This function makes the bricks
     rectMode(CORNER);
     stroke(0);
     strokeWeight(1);
     for (let x = 0; x < this.cols; x++) {
-      for (let y = 0; y < this.rows; y++) {
+      for (let y = 0; y < this.rows; y++) { // It takes three hits to remove a bricks
+        // Each hit makes the brick colour a bit lighter
         if (setOfBricks[x][y] === 3) {
           fill(255, 0, 0);
           aBrick = rect(x * this.width, y * this.height, this.width, this.height);
@@ -415,16 +405,25 @@ class Brick {
   }
 
   addRow() {
+    // This function adds bricks as time passes by to make the game harder
+    this.rows += 1;
+    newArray = [];
     for (let x = 0; x < this.cols; x++) {
       newArray.push([]);
-      for (let y = 0; y < this.newRows; y++) {
-        newArray[x].push(3);
+      for (let y = 0; y < this.rows; y++) {
+        if (y < 1){
+          newArray[x].push(3);
+        }
+        else{
+          newArray[x].push(setOfBricks[x][y - 1]);
+        }
       }
     }
-    concat(setOfBricks, newArray);
+    setOfBricks = newArray;
   }
 
   create2dArray() {
+    // This function creates a 2D Array to help make the bricks appear
     for (let x = 0; x < this.cols; x++) {
       setOfBricks.push([]);
       for (let y = 0; y < this.rows; y++) {
@@ -435,12 +434,13 @@ class Brick {
   }
 
   removeBrick() {
+    // This function uses an algorithm to detect where the ball hit the brick and to remove it if they collided
     for (let x = 0; x < this.cols; x++) {
       for (let y = 0; y < this.rows; y++) {
         this.xPosition = x * this.width;
         this.yPosition = y * this.height;
         if (setOfBricks[x][y] === 1 || setOfBricks[x][y] === 2 || setOfBricks[x][y] === 3) {
-          // check if bottom hits
+          // check if ball hits bottom side
           if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 2 < this.xPosition + this.width &&
             myBall.y - myBall.radius / 2 > this.yPosition + this.height &&
             myBall.y - myBall.radius / 2 + myBall.ySpeed * myBall.yDirection <= this.yPosition + this.height && myBall.yDirection < 0) {
@@ -451,7 +451,7 @@ class Brick {
             }
           }
 
-          // checks if top was hit
+          // checks if ball hits top
           else if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 2 < this.xPosition + this.width &&
             myBall.y + myBall.radius / 2 < this.yPosition &&
             myBall.y + myBall.radius / 2 + myBall.ySpeed * myBall.yDirection >= this.yPosition && myBall.yDirection > 0) {
@@ -462,7 +462,7 @@ class Brick {
             }
           }
 
-          // checks if hits right
+          // checks if ball hits right
           else if (myBall.y + myBall.radius / 2 > this.yPosition && myBall.y - myBall.radius / 2 < this.yPosition + this.height &&
             myBall.x - myBall.radius / 2 > this.xPosition + this.width &&
             myBall.x - myBall.radius / 2 + myBall.xSpeed * myBall.xDirection <= this.xPosition + this.width) {
@@ -473,7 +473,7 @@ class Brick {
             }
           }
 
-          // checks if hit left
+          // checks if ball hits left
           else if (myBall.y + myBall.radius / 2 > this.yPosition && myBall.y - myBall.radius / 2 < this.yPosition + this.height &&
             myBall.x + myBall.radius / 2 < this.xPosition &&
             myBall.x + myBall.radius / 2 + myBall.xSpeed * myBall.xDirection >= this.xPosition) {
@@ -486,5 +486,37 @@ class Brick {
         }
       }
     }
+  }
+}
+
+class Timer {
+  // This Timer class allows the timer to add bricks over certain periods of time
+  constructor(waitTime) {
+    this.waitTime = waitTime;
+    this.startTime = millis();
+    this.finishTime = this.startTime + this.waitTime;
+    this.timerIsDone = false;
+  }
+
+  reset(newWaitTime) {
+    this.waitTime = newWaitTime;
+    this.startTime = millis();
+    this.finishTime = this.startTime + this.waitTime;
+    this.timerIsDone = false;
+  }
+
+  isDone() {
+    if (millis() >= this.finishTime) {
+      return this.timerisDone = true;
+    }
+    else {
+      return this.timerisDone = false;
+    }
+  }
+
+  display() {
+    // Shows time elapsed in bottom center
+    textAlign(CENTER, BOTTOM);
+    text("Time: " + round(millis()), width - 400, height - 5);
   }
 }
