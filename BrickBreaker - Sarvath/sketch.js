@@ -10,6 +10,12 @@ let state = 0;
 let bricks, aBrick;
 let setOfBricks = [];
 let newArray;
+let backgroundPic;
+
+function preload() {
+  backgroundPic = loadImage("images/logo.png");
+}
+
 
 function setup() {
   // Dom
@@ -318,6 +324,9 @@ class Menu {
   }
 
   displayButton() {
+    imageMode(CENTER);
+    image(backgroundPic, width/2 + 50, height/2 - 200);
+
     rectMode(CENTER);
 
     fill(255);
