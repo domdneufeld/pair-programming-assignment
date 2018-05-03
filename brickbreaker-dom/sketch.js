@@ -1,3 +1,20 @@
+// Brick Breaker
+// Domenic Neufeld and Sarvath Sharma
+// Mr. Schellenberg - Comp Sci 30
+// May 2nd, 2018
+// ---------------------------------------------------------------------------------------------------------------------
+// In general Dom worked on the movement of the paddle, the movement of the ball, and the collisions between
+// the ball and paddle/walls. Dom also worked on some of the game play mechanics such as the score multiplier,
+// the strength of bricks, hit power, the increase in speed in the ball and adding bricks.
+//
+// Sarvath worked on creating the 2d array of bricks, the collisions and removal of bricks and the menus and interface of the
+// game. He also spent time on making a system of adding bricks at a set interval of seconds using the timer. While this wasn't
+// used in our final product it was helpful in the development of the game
+//
+// While these were generally what each of us worked on, whenever we ran into a problem that was particularilly difficult we would
+// come together and try to find a solution together. Some problems that required both of us to work on were the removal/collision
+// of bricks, adding bricks to the top of our array, and the directional collisions of the paddle.
+
 // Dom's
 let myPaddle;
 let myBall;
@@ -5,11 +22,17 @@ let lifeCount;
 let myScore;
 let myMenu;
 
-let state = 0; // 0 = pre game menu, 1 = game, 2 =
+let state = 0; // 0 = pre game menu, 1 = game, 2 = loss screen
 // Sarvath's
 let bricks, aBrick;
 let setOfBricks = [];
 let newArray;
+let backgroundPic;
+
+function preload() {
+  // Sarvath
+  backgroundPic = loadImage("images/logo.png");
+}
 
 function setup() {
   // Dom
@@ -128,10 +151,11 @@ class Paddle {
     this.x = width / 2;
     this.y = height - height / 8;
 
-    // Resets the ball speed and power
+    // Resets the ball speed and power ups
     myBall.ySpeed = 6;
     myBall.xSpeed = 6;
     myBall.hitPower = 1;
+    myScore.multiplier = 1;
   }
 
   hitCounter() {
@@ -141,19 +165,22 @@ class Paddle {
     if (this.hitCount % 12 === 0) {
       bricks.addRow();
     }
-    // Every 6 hits the speed of the ball increases
-    if (this.hitCount % 6 === 0){
+    // Every 8 hits the speed of the ball increases
+    if (this.hitCount % 8 === 0){
       myBall.xSpeed += 0.25;
       myBall.ySpeed += 0.25;
     }
-    // Every 18 hits the amount of damage that you do to the bricks increases
-    if (this.hitCount % 18 === 0){
+    // Every 20 hits the amount of damage that you do to the bricks increases
+    if (this.hitCount % 20 === 0){
       myBall.hitPower += 1;
     }
     // Every 24 hits the new row spawned will take one extra hit to destroy
     // This caps at 5, and doesn't reset if you lose a life
     if (this.hitCount % 24 === 0 && bricks.strength < 5){
       bricks.strength += 1;
+    }
+    if (this.hitCount % 50 === 0){
+      myScore.multiplier += 1;
     }
   }
 }
@@ -305,6 +332,7 @@ class Lives {
 class Score {
   constructor() {
     this.amount = 0;
+    this.multiplier = 1;
   }
 
   display() {
@@ -314,6 +342,43 @@ class Score {
   }
 }
 
+function keyPressed() {
+  // Checks to see if left arrow is pressed or if right arrow is pressed
+  if (state === 1) {
+    if (keyCode === LEFT_ARROW) {
+      myPaddle.left = true;
+    }
+
+    if (keyCode === RIGHT_ARROW) {
+      myPaddle.right = true;
+    }
+
+    // When the space bar is pressed it serves the ball
+    if (keyCode === 32 && myPaddle.state === 0) {
+      myPaddle.state = 1;
+      myBall.xDirection = 0;
+      myBall.yDirection = -1;
+    }
+  }
+}
+
+function keyReleased() {
+  // Checks to see if left arrow is released or if right arrow is released
+  if (keyCode === LEFT_ARROW) {
+    myPaddle.left = false;
+  }
+
+  if (keyCode === RIGHT_ARROW) {
+    myPaddle.right = false;
+  }
+}
+
+function mousePressed() {
+  if (state === 0 && myMenu.isMouseOverButton) {
+    state = 1;
+  }
+}
+// SARVATH -------------------------------------------------------------------------------------------------------------------------------------------------
 class Menu {
   constructor() {
     this.buttonx = width / 2;
@@ -324,6 +389,9 @@ class Menu {
   }
 
   displayButton() {
+    imageMode(CENTER);
+    image(backgroundPic, width/2 + 50, height/2 - 200);
+
     rectMode(CENTER);
 
     fill(255);
@@ -349,6 +417,7 @@ class Menu {
       this.isMouseOverButton = false;
     }
   }
+
   displayGameOver() {
     // Writes game over and your score when you lose
     fill(0, 255, 0);
@@ -361,44 +430,6 @@ class Menu {
   }
 }
 
-function keyPressed() {
-  // Checks to see if left arrow is pressed or if right arrow is pressed
-  if (state === 1) {
-    if (keyCode === LEFT_ARROW) {
-      myPaddle.left = true;
-    }
-
-    if (keyCode === RIGHT_ARROW) {
-      myPaddle.right = true;
-    }
-
-    // When the space bar is pressed it serves the ball
-    if (keyCode === 32 && myPaddle.state === 0) {
-      myPaddle.state = 1;
-      myBall.xDirection = 0;
-      myBall.yDirection = -1;
-    }
-  }
-
-}
-
-function keyReleased() {
-  // Checks to see if left arrow is released or if right arrow is released
-  if (keyCode === LEFT_ARROW) {
-    myPaddle.left = false;
-  }
-
-  if (keyCode === RIGHT_ARROW) {
-    myPaddle.right = false;
-  }
-}
-
-function mousePressed() {
-  if (state === 0 && myMenu.isMouseOverButton) {
-    state = 1;
-  }
-}
-// SARVATH -------------------------------------------------------------------------------------------------------------------------------------------------
 class Brick {
   constructor() {
     this.rows = 4;
@@ -415,6 +446,7 @@ class Brick {
     strokeWeight(1);
     for (let x = 0; x < this.cols; x++) {
       for (let y = 0; y < this.rows; y++) {
+        // Draws bricks with different strengths different colours.
         if (setOfBricks[x][y] === 5) {
           fill(200, 0, 255);
           aBrick = rect(x * this.width, y * this.height, this.width, this.height);
@@ -489,7 +521,7 @@ class Brick {
             setOfBricks[x][y] -= 1 * myBall.hitPower;
             myBall.yDirection = -myBall.yDirection;
             if (setOfBricks[x][y] <= 0) {
-              myScore.amount += 10;
+              myScore.amount += 10 * myScore.multiplier;
             }
           }
 
@@ -500,8 +532,8 @@ class Brick {
             myBall.y + myBall.radius / 2 + myBall.ySpeed * myBall.yDirection >= this.yPosition && myBall.yDirection > 0) {
             setOfBricks[x][y] -= 1 * myBall.hitPower;
             myBall.yDirection = -myBall.yDirection;
-            if (setOfBricks[x][y] === 0) {
-              myScore.amount += 10;
+            if (setOfBricks[x][y] <= 0) {
+              myScore.amount += 10 * myScore.multiplier;
             }
           }
 
@@ -512,8 +544,8 @@ class Brick {
             myBall.x - myBall.radius / 2 + myBall.xSpeed * myBall.xDirection <= this.xPosition + this.width) {
             setOfBricks[x][y] -= 1 * myBall.hitPower;
             myBall.xDirection = -myBall.xDirection;
-            if (setOfBricks[x][y] === 0) {
-              myScore.amount += 10;
+            if (setOfBricks[x][y] <= 0) {
+              myScore.amount += 10 * myScore.multiplier;
             }
           }
 
@@ -524,8 +556,8 @@ class Brick {
             myBall.x + myBall.radius / 2 + myBall.xSpeed * myBall.xDirection >= this.xPosition) {
             setOfBricks[x][y] -= 1 * myBall.hitPower;
             myBall.xDirection = -myBall.xDirection;
-            if (setOfBricks[x][y] === 0) {
-              myScore.amount += 10;
+            if (setOfBricks[x][y] <= 0) {
+              myScore.amount += 10 * myScore.multiplier;
             }
           }
         }
