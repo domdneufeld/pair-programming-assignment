@@ -409,7 +409,6 @@ class Brick {
     this.cols = 8;
     this.width = width / 8;
     this.height = height / 16;
-    this.hit = false;
     this.state = 0;
     this.strength = 3;
   }
@@ -487,7 +486,8 @@ class Brick {
         this.yPosition = y * this.height;
         if (setOfBricks[x][y] > 0) {
           // check if bottom hits
-          if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 2 < this.xPosition + this.width &&
+          if (myBall.x + myBall.radius / 2 + myBall.xSpeed * myBall.xDirection > this.xPosition && 
+            myBall.x - myBall.radius / 2 + myBall.xSpeed * myBall.xDirection < this.xPosition + this.width &&
             myBall.y - myBall.radius / 2 > this.yPosition + this.height &&
             myBall.y - myBall.radius / 2 + myBall.ySpeed * myBall.yDirection <= this.yPosition + this.height && myBall.yDirection < 0) {
             setOfBricks[x][y] -= 1 * myBall.hitPower;
@@ -498,7 +498,8 @@ class Brick {
           }
 
           // checks if top was hit
-          else if (myBall.x + myBall.radius / 2 > this.xPosition && myBall.x - myBall.radius / 2 < this.xPosition + this.width &&
+          else if (myBall.x + myBall.radius / 2 > this.xPosition + myBall.xSpeed * myBall.xDirection &&
+            myBall.x - myBall.radius / 2 + myBall.xSpeed * myBall.xDirection < this.xPosition + this.width &&
             myBall.y + myBall.radius / 2 < this.yPosition &&
             myBall.y + myBall.radius / 2 + myBall.ySpeed * myBall.yDirection >= this.yPosition && myBall.yDirection > 0) {
             setOfBricks[x][y] -= 1 * myBall.hitPower;
@@ -509,7 +510,8 @@ class Brick {
           }
 
           // checks if hits right
-          else if (myBall.y + myBall.radius / 2 > this.yPosition && myBall.y - myBall.radius / 2 < this.yPosition + this.height &&
+          else if (myBall.y + myBall.radius / 2 + myBall.ySpeed * myBall.yDirection > this.yPosition &&
+            myBall.y - myBall.radius / 2 + myBall.ySpeed * myBall.yDirection < this.yPosition + this.height &&
             myBall.x - myBall.radius / 2 > this.xPosition + this.width &&
             myBall.x - myBall.radius / 2 + myBall.xSpeed * myBall.xDirection <= this.xPosition + this.width) {
             setOfBricks[x][y] -= 1 * myBall.hitPower;
@@ -520,7 +522,8 @@ class Brick {
           }
 
           // checks if hit left
-          else if (myBall.y + myBall.radius / 2 > this.yPosition && myBall.y - myBall.radius / 2 < this.yPosition + this.height &&
+          else if (myBall.y + myBall.radius / 2 + myBall.ySpeed * myBall.yDirection > this.yPosition &&
+            myBall.y - myBall.radius / 2 + myBall.ySpeed * myBall.yDirection < this.yPosition + this.height &&
             myBall.x + myBall.radius / 2 < this.xPosition &&
             myBall.x + myBall.radius / 2 + myBall.xSpeed * myBall.xDirection >= this.xPosition) {
             setOfBricks[x][y] -= 1 * myBall.hitPower;
